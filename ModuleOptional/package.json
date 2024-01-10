@@ -1,0 +1,14 @@
+{
+  "name": "firstproject",
+  "version": "1.0.0",
+  "description": "First JavaScript project",
+  "main": "index.js",
+  "scripts": {
+    "test": "aa"
+  },
+  "keywords": [
+    "key"
+  ],
+  "author": "phongle",
+  "license": "ISC"
+}
