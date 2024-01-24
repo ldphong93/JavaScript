@@ -4,10 +4,10 @@
   "description": "First JavaScript project",
   "main": "index.js",
   "scripts": {
-    "test": "aa"
+    "test": "testScript"
   },
   "keywords": [
-    "key"
+    "keywords"
   ],
   "author": "phongle",
   "license": "ISC"
