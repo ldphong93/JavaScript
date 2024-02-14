@@ -1,13 +1,14 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Button, Card, Form, Input } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
-import { UserContext } from '../../common/UserContext';
+import { useDispatch } from 'react-redux';
+import { loginAction } from '@store/user/actions';
 
 const loginURL = 'http://localhost:4000/login';
 
 const Login = () => {
 	const navigate = useNavigate();
-	const { setUsername } = useContext(UserContext);
+	const dispatch = useDispatch();
 
 	const onFinish = async (values) => {
 		console.log('Successfully login');
@@ -28,9 +29,15 @@ const Login = () => {
 			const resultJson = await response.json();
 			const token = resultJson.result;
 			localStorage.setItem('userToken', token);
-
 			console.log(resultJson);
-			setUsername(resultJson.user.name); // this is the key part
+
+			dispatch(
+				loginAction({
+					name: resultJson.user.name,
+					email: resultJson.user.email,
+					token: token,
+				})
+			);
 
 			console.log('User token: ', token);
 
@@ -69,22 +76,6 @@ const Login = () => {
 					onFinishFailed={onFinishFailed}
 					autoComplete='off'
 				>
-					<Form.Item
-						label='Name'
-						labelCol={{ span: 24 }}
-						wrapperCol={{ span: 24 }}
-						fontSize='50px'
-						name='name'
-						placeholder='Input text'
-						rules={[
-							{
-								required: true,
-								message: 'Please input your name!',
-							},
-						]}
-					>
-						<Input />
-					</Form.Item>
 					<Form.Item
 						label='Email'
 						labelCol={{ span: 24 }}

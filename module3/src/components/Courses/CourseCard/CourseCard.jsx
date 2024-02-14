@@ -1,16 +1,39 @@
-import Button from '../../../common/Button/Button.jsx';
+import Button from '@common/Button/Button';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { deleteCourseAction } from '@store/courses/actions';
+import { getAuthors } from '@store/selector';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const CourseCard = (props) => {
 	const navigate = useNavigate();
+	const dispatch = useDispatch();
+	const authorDetail = useSelector(getAuthors);
 
 	const handleClickShow = () => {
 		navigate(`/courses/${props.id}`);
 	};
-	const handleClickDelete = () => {};
+	const handleClickDelete = () => {
+		dispatch(deleteCourseAction({ id: props.id }));
+		navigate('/');
+	};
 	const handleClickUpdate = () => {};
+
+	//duration format
+	const hours = Math.floor(props.duration / 60);
+	const minutes = props.duration % 60;
+	let convertedDuration = '';
+	convertedDuration += hours < 10 ? '0' + hours + ':' : hours + ':';
+	convertedDuration += minutes < 10 ? '0' + minutes : minutes;
+	convertedDuration += hours === 1 ? ' hour' : ' hours';
+
+	//date format
+	let parts = props.creationDate.split('/');
+	// Padding the day and month with '0' if they are single digit
+	let formattedDay = parts[0].padStart(2, '0');
+	let formattedMonth = parts[1].padStart(2, '0');
+	let formattedCreationDate = `${formattedDay}.${formattedMonth}.${parts[2]}`;
 
 	return (
 		<div
@@ -28,17 +51,25 @@ const CourseCard = (props) => {
 							<div>
 								<div>
 									<span style={{ fontWeight: 'bold' }}>Authors: </span>
-									<span>{props.authors}</span>
+									<span>
+										{props.authors
+											.map(
+												(id) =>
+													authorDetail.filter((author) => author.id === id)[0]
+														.name
+											)
+											.join(', ')}
+									</span>
 								</div>
 
 								<div>
 									<span style={{ fontWeight: 'bold' }}>Duration: </span>
-									<span>{props.duration}</span>
+									<span>{convertedDuration}</span>
 								</div>
 
 								<div>
 									<span style={{ fontWeight: 'bold' }}>Created: </span>
-									<span>{props.creationDate}</span>
+									<span>{formattedCreationDate}</span>
 								</div>
 							</div>
 						</div>

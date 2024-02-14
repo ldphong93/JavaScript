@@ -1,12 +1,12 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate, useParams } from 'react-router-dom';
-import Button from '../../common/Button/Button.jsx';
-import { UserContext } from '../../common/UserContext.jsx';
-import { useContext } from 'react';
+import Button from '@common/Button/Button';
+import { useSelector } from 'react-redux';
+import { getCourses } from '@store/selector';
 
 const CourseInfo = () => {
 	let { id } = useParams();
-	const { allCourses } = useContext(UserContext);
+	const allCourses = useSelector(getCourses);
 	const courseContent = allCourses.find((course) => course.id === id);
 
 	const navigate = useNavigate();

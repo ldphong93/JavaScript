@@ -1,21 +1,27 @@
-import SearchBar from './SearchBar/SearchBar.jsx';
-import Button from '../../common/Button/Button.jsx';
-import CourseCard from './CourseCard/CourseCard.jsx';
-import { useContext, useState } from 'react';
-import { UserContext } from '../../common/UserContext.jsx';
+import SearchBar from '@components/Courses/SearchBar/SearchBar';
+import Button from '@common/Button/Button';
+import CourseCard from '@components/Courses/CourseCard/CourseCard';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { getCourses } from '@store/selector';
 
 const Courses = () => {
-	const { allCourses } = useContext(UserContext);
-	const [renderedCourses, setRenderedCourses] = useState(allCourses);
-	const searchCourse = (courses) => {
-		setRenderedCourses(courses);
-	};
-
 	const navigate = useNavigate();
 	const handleAddNewCourseButton = () => {
 		navigate('/courses/add');
 	};
+
+	const courses = useSelector(getCourses);
+	const [searchTerm, setSearchTerm] = useState('');
+
+	const handleSearch = (term) => {
+		setSearchTerm(term);
+	};
+
+	const renderedCourses = courses.filter((course) =>
+		course.title.toLowerCase().includes(searchTerm.toLowerCase())
+	);
 
 	return (
 		<div>
@@ -23,7 +29,7 @@ const Courses = () => {
 				className='d-flex justify-content-between'
 				style={{ width: '60rem', margin: '0 auto' }}
 			>
-				<SearchBar onSearch={searchCourse} />
+				<SearchBar onSearch={handleSearch} />
 				<div
 					className='d-flex justify-content-center'
 					style={{ marginTop: '20px', marginBottom: '20px' }}

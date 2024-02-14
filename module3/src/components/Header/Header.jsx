@@ -1,18 +1,19 @@
 import Logo from './Logo/Logo.jsx';
-import Button from '../../common/Button/Button.jsx';
-import { useContext } from 'react';
-import { UserContext } from '../../common/UserContext.jsx';
+import Button from '@common/Button/Button';
 import { useNavigate } from 'react-router-dom';
-import { mockedCoursesListWithAuthorsName } from '../../common/Data/MockData.jsx';
+import { useSelector, useDispatch } from 'react-redux';
+import { logoutAction } from '@store/user/actions';
+import { getUser } from '@store/selector';
 
 const Header = () => {
-	const { username, setUsername, setAllCourses } = useContext(UserContext);
-
 	const navigate = useNavigate();
+	const dispatch = useDispatch();
+	const user = useSelector(getUser);
+	const username = user.name;
+
 	const onClickLogOut = () => {
 		localStorage.removeItem('userToken');
-		setUsername('');
-		setAllCourses(mockedCoursesListWithAuthorsName);
+		dispatch(logoutAction());
 		navigate('/login');
 	};
 

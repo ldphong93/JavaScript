@@ -1,4 +1,4 @@
-import Button from '../../../common/Button/Button.jsx';
+import Button from '@common/Button/Button';
 
 const AuthorItem = (props) => {
 	return (

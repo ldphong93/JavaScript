@@ -1,47 +1,50 @@
 import { Card, Form, Input, Button } from 'antd';
-import { useContext, useState } from 'react';
+import { useState, useEffect } from 'react';
 import AuthorItem from './AuthorItem/AuthorItem';
-import { mockedAuthorsList } from '../../common/Data/MockData.jsx';
-import CustomButton from '../../common/Button/Button.jsx';
+import CustomButton from '@common/Button/Button';
 import { v4 as uuidv4 } from 'uuid';
-import { UserContext } from '../../common/UserContext.jsx';
 import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
+import { addCourseAction } from '@store/courses/actions';
+import { useDispatch, useSelector } from 'react-redux';
+import { addAuthorAction } from '@store/authors/actions';
+import { getAuthors } from '@store/selector';
 
 const CreateCourse = () => {
-	const { allCourses, setAllCourses } = useContext(UserContext);
 	const navigate = useNavigate();
+	const dispatch = useDispatch();
+
+	const forbiddenSymbols = /[@#$%^&]/;
+
+	const initialAuthors = useSelector(getAuthors);
+	const [authorList, setAuthorList] = useState(initialAuthors);
+
+	const [courseAuthor, setCourseAuthor] = useState([]);
+
+	const [title, setTitle] = useState('');
+	const [durationOutput, setDurationOutput] = useState('00:00');
+	const [newAuthorName, setNewAuthorName] = useState('');
 
 	const onFinish = (values) => {
 		console.log('Course successfully added', values);
 
 		const courseId = uuidv4();
-		//duration format
-		const hours = Math.floor(values.duration / 60);
-		const minutes = values.duration % 60;
-		let convertedDuration = '';
-		convertedDuration += hours < 10 ? '0' + hours + ':' : hours + ':';
-		convertedDuration += minutes < 10 ? '0' + minutes : minutes;
-		convertedDuration += hours === 1 ? ' hour' : ' hours';
-		//date format
-		const createdDate = moment().format('DD.MM.YYYY');
+
+		// //date format
+		const createdDate = moment().format('DD/MM/YYYY');
 
 		const newCourse = {
 			id: courseId,
 			description: values.description,
-			duration: convertedDuration,
+			duration: parseInt(values.duration, 10),
 			title: values.title,
 			creationDate: createdDate,
-			authors: courseAuthor.map((auth) => auth.name).join(', '),
+			authors: courseAuthor.map((auth) => auth.id),
 		};
-		setAllCourses([...allCourses, newCourse]);
+		dispatch(addCourseAction(newCourse));
 		navigate('/');
 	};
 	const onFinishFailed = (errorInfo) => {};
-	const forbiddenSymbols = /[@#$%^&]/;
-
-	const [authorList, setAuthorList] = useState(mockedAuthorsList);
-	const [courseAuthor, setCourseAuthor] = useState([]);
 
 	const onClickAdd = (id) => {
 		let foundAuthor = authorList.find((author) => author.id === id);
@@ -60,17 +63,17 @@ const CreateCourse = () => {
 	};
 
 	const onClickCreateAuthor = () => {
-		const id = uuidv4();
-		setAuthorList([...authorList, { id, name: newAuthorName }]);
+		const userId = uuidv4();
+		setAuthorList([...authorList, { id: userId, name: newAuthorName }]);
+		//add to store
+		dispatch(addAuthorAction({ id: userId, name: newAuthorName }));
+		//reset UI
 		setNewAuthorName('');
 	};
 
 	const onClickBack = () => {
 		navigate('/');
 	};
-	const [title, setTitle] = useState('');
-	const [durationOutput, setDurationOutput] = useState('00:00');
-	const [newAuthorName, setNewAuthorName] = useState('');
 
 	const handleTitleChange = (event) => {
 		const value = event.target.value;
