@@ -2,8 +2,8 @@ import Logo from './Logo/Logo.jsx';
 import Button from '@common/Button/Button';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { logoutAction } from '@store/user/actions';
 import { getUser } from '@store/selector';
+import { logOutThunk } from '@store/user/thunk.js';
 
 const Header = () => {
 	const navigate = useNavigate();
@@ -13,7 +13,7 @@ const Header = () => {
 
 	const onClickLogOut = () => {
 		localStorage.removeItem('userToken');
-		dispatch(logoutAction());
+		dispatch(logOutThunk(user.token));
 		navigate('/login');
 	};
 

@@ -4,7 +4,7 @@
       "paths": {
         "@components/*": ["./src/components/*"],
         "@common/*": ["./src/common/*"],
-        "@store/*": ["./src/store/*"],
+        "@store/*": ["./src/store/*"]
       }
     }
   }

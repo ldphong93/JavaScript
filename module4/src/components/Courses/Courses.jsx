@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { getCourses } from '@store/selector';
+import EmptyCourseList from '@components/EmptyCourseList/EmptyCourseList';
 
 const Courses = () => {
 	const navigate = useNavigate();
@@ -23,7 +24,9 @@ const Courses = () => {
 		course.title.toLowerCase().includes(searchTerm.toLowerCase())
 	);
 
-	return (
+	let areCoursesAvailable = renderedCourses.length > 0;
+
+	return areCoursesAvailable ? (
 		<div>
 			<div
 				className='d-flex justify-content-between'
@@ -62,6 +65,8 @@ const Courses = () => {
 				))
 			)}
 		</div>
+	) : (
+		<EmptyCourseList />
 	);
 };
 

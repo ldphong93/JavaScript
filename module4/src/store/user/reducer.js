@@ -5,6 +5,7 @@ const userInitialState = {
 	name: '',
 	email: '',
 	token: '',
+	role: '',
 };
 export const userReducer = (state = userInitialState, action) => {
 	switch (action.type) {
@@ -14,9 +15,15 @@ export const userReducer = (state = userInitialState, action) => {
 				name: action.payload.name,
 				email: action.payload.email,
 				token: action.payload.token,
+				role: '',
 			};
 		case types.USER_LOGOUT:
 			return userInitialState;
+		case types.USER_UPDATE:
+			return {
+				...state,
+				role: action.payload.role,
+			};
 		default:
 			return state;
 	}

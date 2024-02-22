@@ -1,74 +1,116 @@
 import { Card, Form, Input, Button } from 'antd';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AuthorItem from './AuthorItem/AuthorItem';
 import CustomButton from '@common/Button/Button';
-import { v4 as uuidv4 } from 'uuid';
-import moment from 'moment';
-import { useNavigate } from 'react-router-dom';
-import { addCourseAction } from '@store/courses/actions';
+import { useNavigate, useParams } from 'react-router-dom';
+import { createCourseThunk, updateCourseThunk } from '@store/courses/thunk';
 import { useDispatch, useSelector } from 'react-redux';
-import { addAuthorAction } from '@store/authors/actions';
-import { getAuthors } from '@store/selector';
+import { addAuthorThunk } from '@store/authors/thunk';
+import { getAuthors, getCourses, getUser } from '@store/selector';
+import { convertDuration } from '@common/constants/Constants';
 
-const CreateCourse = () => {
+const CourseForm = (props) => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
-
+	const user = useSelector(getUser);
+	const allAuthors = useSelector(getAuthors);
+	const [form] = Form.useForm();
 	const forbiddenSymbols = /[@#$%^&]/;
 
-	const initialAuthors = useSelector(getAuthors);
-	const [authorList, setAuthorList] = useState(initialAuthors);
+	let { courseId } = useParams();
+	let outdatedCourseAuthors = [];
+	let outdatedDurationDisplayed = '00:00';
 
-	const [courseAuthor, setCourseAuthor] = useState([]);
+	const courseToUpdate = useSelector(getCourses).filter(
+		(course) => course.id === courseId
+	)[0];
+
+	if (courseToUpdate) {
+		outdatedCourseAuthors = courseToUpdate.authors.map(
+			(authorId) => allAuthors.filter((author) => author.id === authorId)[0]
+		);
+		outdatedDurationDisplayed = convertDuration(courseToUpdate.duration);
+	}
+	const [courseAuthor, setCourseAuthor] = useState(outdatedCourseAuthors);
 
 	const [title, setTitle] = useState('');
-	const [durationOutput, setDurationOutput] = useState('00:00');
+	const [duration, setDuration] = useState('');
+	const [durationDisplayed, setDurationDisplayed] = useState(
+		outdatedDurationDisplayed
+	);
 	const [newAuthorName, setNewAuthorName] = useState('');
 
+	useEffect(() => {
+		if (courseToUpdate && props.formType === 'UPDATE') {
+			form.setFieldsValue({
+				title: courseToUpdate.title,
+				duration: courseToUpdate.duration,
+				description: courseToUpdate.description,
+			});
+		}
+	}, [courseToUpdate, props.formType, form]);
+
 	const onFinish = (values) => {
-		console.log('Course successfully added', values);
+		if (props.formType === 'CREATE') {
+			console.log('Course successfully added', values);
 
-		const courseId = uuidv4();
+			const newCourse = {
+				title: values.title,
+				description: values.description,
+				duration: parseInt(values.duration, 10),
+				authors: courseAuthor.map((auth) => auth.id),
+			};
+			dispatch(createCourseThunk({ body: newCourse, token: user.token }));
+			navigate('/');
+		} else if (props.formType === 'UPDATE') {
+			console.log('Course successfully updated', values);
 
-		// //date format
-		const createdDate = moment().format('DD/MM/YYYY');
-
-		const newCourse = {
-			id: courseId,
-			description: values.description,
-			duration: parseInt(values.duration, 10),
-			title: values.title,
-			creationDate: createdDate,
-			authors: courseAuthor.map((auth) => auth.id),
-		};
-		dispatch(addCourseAction(newCourse));
-		navigate('/');
+			const updatedCourse = {
+				title: values.title,
+				description: values.description,
+				duration: parseInt(values.duration, 10),
+				authors: courseAuthor.map((auth) => auth.id),
+				// id: courseToUpdate.id,
+				creationDate: courseToUpdate.creationDate,
+			};
+			//TODO
+			dispatch(
+				updateCourseThunk({
+					id: courseId,
+					body: updatedCourse,
+					token: user.token,
+				})
+			);
+			navigate('/');
+		}
 	};
 	const onFinishFailed = (errorInfo) => {};
 
 	const onClickAdd = (id) => {
-		let foundAuthor = authorList.find((author) => author.id === id);
-		if (foundAuthor !== undefined) {
-			setAuthorList(authorList.filter((author) => author.id !== id));
-			setCourseAuthor([...courseAuthor, foundAuthor]);
+		let foundAuthor = allAuthors.find((author) => author.id === id);
+		if (foundAuthor) {
+			//check if courseAuthor does not contains target author --> add to courseAuthor
+			if (courseAuthor.filter((author) => author.id === id).length === 0) {
+				setCourseAuthor([...courseAuthor, foundAuthor]);
+			}
 		}
 	};
 
 	const onClickRemove = (id) => {
 		let foundAuthor = courseAuthor.find((author) => author.id === id);
 		if (foundAuthor) {
-			setAuthorList([...authorList, foundAuthor]);
-			setCourseAuthor(courseAuthor.filter((author) => author.id !== id));
+			if (courseAuthor.filter((author) => author.id === id).length !== 0) {
+				setCourseAuthor(courseAuthor.filter((author) => author.id !== id));
+			}
 		}
 	};
 
 	const onClickCreateAuthor = () => {
-		const userId = uuidv4();
-		setAuthorList([...authorList, { id: userId, name: newAuthorName }]);
-		//add to store
-		dispatch(addAuthorAction({ id: userId, name: newAuthorName }));
-		//reset UI
-		setNewAuthorName('');
+		if (newAuthorName !== '') {
+			//reset UI
+			setNewAuthorName('');
+			dispatch(addAuthorThunk({ name: newAuthorName, token: user.token }));
+		}
 	};
 
 	const onClickBack = () => {
@@ -84,6 +126,8 @@ const CreateCourse = () => {
 
 	const handleDurationChange = (event) => {
 		const value = event.target.value;
+		setDuration(value);
+
 		let hours = Math.floor(value / 60);
 		if (hours < 10) {
 			hours = '0' + hours;
@@ -93,7 +137,7 @@ const CreateCourse = () => {
 		if (minutes < 10) {
 			minutes = '0' + minutes;
 		}
-		setDurationOutput('' + hours + ':' + minutes);
+		setDurationDisplayed('' + hours + ':' + minutes);
 	};
 
 	const handleNewAuthorInputChange = (event) => {
@@ -104,6 +148,7 @@ const CreateCourse = () => {
 	return (
 		<div className='d-flex justify-content-center'>
 			<Form
+				form={form}
 				name='basic'
 				// labelCol={{
 				// 	span: 12,
@@ -112,9 +157,7 @@ const CreateCourse = () => {
 				// 	span: 12,
 				// }}
 				style={{ width: '60%' }} //
-				initialValues={{
-					remember: true,
-				}}
+				initialValues={{ remember: true }}
 				onFinish={onFinish}
 				onFinishFailed={onFinishFailed}
 				autoComplete='off'
@@ -156,28 +199,34 @@ const CreateCourse = () => {
 
 					<h4>Duration</h4>
 
-					<Form.Item
-						label='Duration'
-						labelCol={{ span: 24 }}
-						wrapperCol={{ span: 24 }}
-						name='duration'
-						rules={[
-							{
-								required: true,
-								message: 'Duration is required',
-							},
-						]}
+					<div
+						style={{
+							display: 'flex',
+							flexDirection: 'row',
+							alignItems: 'center',
+							gap: '1px',
+						}}
 					>
-						<div>
-							<span>
-								<Input
-									onChange={handleDurationChange}
-									style={{ width: '25%', marginRight: '10px' }}
-								/>
-							</span>
-							<span>{durationOutput} (hh:mm)</span>
-						</div>
-					</Form.Item>
+						<Form.Item
+							label='Duration'
+							labelCol={{ span: 24 }}
+							wrapperCol={{ span: 24 }}
+							fontSize='50px'
+							name='duration'
+							placeholder='Input text'
+							rules={[
+								{
+									required: true,
+									message: 'Duration is required.',
+								},
+							]}
+						>
+							<Input value={duration} onChange={handleDurationChange} />
+						</Form.Item>
+						<p style={{ marginLeft: '10px', marginTop: '30px' }}>
+							{durationDisplayed} hh:mm
+						</p>
+					</div>
 
 					<div
 						className='d-flex justify-content-between'
@@ -187,7 +236,7 @@ const CreateCourse = () => {
 							style={{ flex: '1', marginRight: '5%', boxSizing: 'border-box' }}
 						>
 							<h4>Authors List</h4>
-							{authorList.map((author) => (
+							{allAuthors.map((author) => (
 								<AuthorItem
 									key={author.id}
 									authorName={author.name}
@@ -230,13 +279,26 @@ const CreateCourse = () => {
 						className='default-button'
 						onClick={onClickBack}
 					/>
-					<Button type='primary' htmlType='submit'>
-						CREATE COURSE
-					</Button>
+					{(() => {
+						if (props.formType === 'CREATE') {
+							return (
+								<Button type='primary' htmlType='submit'>
+									CREATE COURSE
+								</Button>
+							);
+						} else if (props.formType === 'UPDATE') {
+							return (
+								<Button type='primary' htmlType='submit'>
+									UPDATE COURSE
+								</Button>
+							);
+						}
+						//immediately-invoked () right after anonymous function (() => {})
+					})()}
 				</div>
 			</Form>
 		</div>
 	);
 };
 
-export default CreateCourse;
+export default CourseForm;

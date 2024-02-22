@@ -12,3 +12,7 @@ export const saveCourseAction = (payload) => ({
 	type: types.SAVE_COURSES,
 	payload,
 });
+export const updateCourseAction = (payload) => ({
+	type: types.UPDATE_COURSE,
+	payload,
+});

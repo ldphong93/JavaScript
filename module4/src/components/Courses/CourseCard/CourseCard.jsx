@@ -1,24 +1,28 @@
 import Button from '@common/Button/Button';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { deleteCourseAction } from '@store/courses/actions';
-import { getAuthors } from '@store/selector';
+import { deleteCourseThunk } from '@store/courses/thunk';
+import { getAuthors, getUser } from '@store/selector';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const CourseCard = (props) => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
+	const user = useSelector(getUser);
 	const authorDetail = useSelector(getAuthors);
 
 	const handleClickShow = () => {
 		navigate(`/courses/${props.id}`);
 	};
 	const handleClickDelete = () => {
-		dispatch(deleteCourseAction({ id: props.id }));
+		dispatch(deleteCourseThunk({ id: props.id, token: user.token }));
+
 		navigate('/');
 	};
-	const handleClickUpdate = () => {};
+	const handleClickUpdate = () => {
+		navigate(`/courses/update/${props.id}`);
+	};
 
 	//duration format
 	const hours = Math.floor(props.duration / 60);

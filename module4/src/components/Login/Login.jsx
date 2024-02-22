@@ -3,6 +3,7 @@ import { Button, Card, Form, Input } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { loginAction } from '@store/user/actions';
+import { fetchUserRoleThunk } from '@store/user/thunk';
 
 const loginURL = 'http://localhost:4000/login';
 
@@ -38,6 +39,7 @@ const Login = () => {
 					token: token,
 				})
 			);
+			dispatch(fetchUserRoleThunk(token));
 
 			console.log('User token: ', token);
 
