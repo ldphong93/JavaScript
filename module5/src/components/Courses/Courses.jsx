@@ -9,12 +9,12 @@ import EmptyCourseList from '@components/EmptyCourseList/EmptyCourseList';
 
 const Courses = () => {
 	const navigate = useNavigate();
+	const courses = useSelector(getCourses);
+	const [searchTerm, setSearchTerm] = useState('');
+
 	const handleAddNewCourseButton = () => {
 		navigate('/courses/add');
 	};
-
-	const courses = useSelector(getCourses);
-	const [searchTerm, setSearchTerm] = useState('');
 
 	const handleSearch = (term) => {
 		setSearchTerm(term);

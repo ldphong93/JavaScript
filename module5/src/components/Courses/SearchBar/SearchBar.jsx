@@ -8,6 +8,8 @@ const SearchBar = ({ onSearch }) => {
 		setSearchTerm(event.target.value);
 	};
 
+	// debounce
+
 	const handleKeyPress = (event) => {
 		if (event.key === 'Enter') {
 			onSearch(searchTerm);

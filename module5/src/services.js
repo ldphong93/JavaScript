@@ -9,6 +9,12 @@ const deleteCourseURL = 'http://localhost:4000/courses/{id}';
 const createAuthorURL = 'http://localhost:4000/authors/add';
 const logOutURL = 'http://localhost:4000/logout';
 
+// 4 steps of api call
+// Request
+// Loading
+// Success
+// Failure
+
 export const fetchData = async (url) => {
 	try {
 		const response = await fetch(url, {

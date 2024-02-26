@@ -5,6 +5,7 @@ import { deleteCourseThunk } from '@store/courses/thunk';
 import { getAuthors, getUser } from '@store/selector';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { useCallback } from 'react';
 
 const CourseCard = (props) => {
 	const navigate = useNavigate();
@@ -12,9 +13,10 @@ const CourseCard = (props) => {
 	const user = useSelector(getUser);
 	const authorDetail = useSelector(getAuthors);
 
-	const handleClickShow = () => {
+	const handleClickShow = useCallback(() => {
 		navigate(`/courses/${props.id}`);
-	};
+	}, [props.id, navigate]);
+
 	const handleClickDelete = () => {
 		dispatch(deleteCourseThunk({ id: props.id, token: user.token }));
 

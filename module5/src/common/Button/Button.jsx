@@ -8,5 +8,5 @@ const Button = (props) => {
 		</button>
 	);
 };
-
-export default Button;
+//shallow compare
+export default React.memo(Button);
