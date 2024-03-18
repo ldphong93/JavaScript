@@ -13,6 +13,7 @@ export const coursesReducer = (state = coursesInitialState, action) => {
 				...state.filter((course) => course.id !== action.payload.id),
 				{ ...action.payload.body, id: action.payload.id },
 			];
+			// [].splice
 			return aa;
 		// return [
 		// 	...state.filter((course) => course.id !== action.payload.id),

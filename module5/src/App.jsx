@@ -17,15 +17,6 @@ function App() {
 		dispatch(fetchDataFromServer());
 	}, [dispatch]);
 
-	// useEffect(() => {
-	// 	dispatch(async (dispatch) => {
-	// 		const courses = await fetchData(getAllCoursesURL);
-	// 		const authors = await fetchData(getAllAuthorsURL);
-	// 		dispatch(saveCourseAction(courses));
-	// 		dispatch(saveAuthorAction(authors));
-	// 	});
-	// }, [dispatch]);
-
 	return (
 		<Router>
 			<Header />
