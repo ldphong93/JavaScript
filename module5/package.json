@@ -27,13 +27,20 @@
     "eslint:fix": "eslint --fix --ext .js --ext .jsx src",
     "test:nowatch": "react-scripts test --watchAll=false",
     "prepare": "husky install",
-    "prepublish": "npm run eslint:fix"
+    "prepublish": "npm run eslint:fix && npm run test:nowatc"
   },
   "eslintConfig": {
     "extends": [
       "react-app",
       "react-app/jest"
     ]
+  },
+  "jest": {
+    "moduleNameMapper": {
+      "^@common(.*)$": "<rootDir>/src/common$1",
+      "^@store(.*)$": "<rootDir>/src/store$1",
+      "^@components(.*)$": "<rootDir>/src/components$1"
+    }
   },
   "browserslist": {
     "production": [
